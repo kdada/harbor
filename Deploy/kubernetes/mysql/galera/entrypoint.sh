@@ -105,7 +105,7 @@ fi
 
 
 # generate a init.sql
-if [ $firstTime -eq 1 ]; then
+if [ $firstTime -eq 1 -a $alive -eq 0 ]; then
     tempFile='/tmp/first.sql'
     cat > "$tempFile" <<-EOF
 DELETE FROM mysql.user ;
@@ -131,12 +131,13 @@ EOF
     echo 'FLUSH PRIVILEGES ;' >> "$tempFile"
 
     # use initial script when current node is the most advanced node of galera   
-    if [ $alive -eq 0 -a -f './init.sql' ]; then
+    if [ -f './init.sql' ]; then
         cat ./init.sql >> "$tempFile"
     fi
 
     set -- "$@" --init-file="$tempFile"
 fi
+echo "info: $@"
 exec "$@"
 
 
