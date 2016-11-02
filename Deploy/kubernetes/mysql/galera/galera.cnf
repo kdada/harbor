@@ -1,4 +1,5 @@
 [mysqld]
+explicit_defaults_for_timestamp=true
 binlog_format=ROW
 bind-address=0.0.0.0
 default_storage_engine=innodb

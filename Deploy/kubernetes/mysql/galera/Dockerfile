@@ -16,7 +16,11 @@ RUN export DEBIAN_FRONTEND=noninteractive &&\
 
 COPY ./galera.cnf /etc/mysql/conf.d/galera.cnf
 
+COPY ./my.cnf /etc/mysql/my.cnf
+
 COPY ./entrypoint.sh /entrypoint.sh
+
+RUN chmod u+x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
