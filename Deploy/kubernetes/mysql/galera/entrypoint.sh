@@ -70,9 +70,15 @@ check() {
     IFS=','
     nodes=($GALERA_CLUSTER_ADDRESS)
     IFS=$oldIFS
+    pids=""
     for node in ${nodes[@]}
     do
-        timeout 1 bash -c "</dev/tcp/$node/3306"
+        timeout 1 bash -c "</dev/tcp/$node/3306" &
+        pids="$pids $!"
+    done
+    for pid in $pids 
+    do
+        wait $pid
         if [ $? -eq 0 ]; then
             alive=1
             break
