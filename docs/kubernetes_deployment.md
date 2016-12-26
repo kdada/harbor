@@ -3,25 +3,25 @@
 This Document decribes how to deploy Harbor on Kubernetes.
 
 ### Prerequisite
-You need to get docker images of Harbor. See [Installation Guide](./installation_guide.md)
-
+* You need to build docker images of Harbor. See [Installation Guide](./installation_guide.md)
+* You should have domain knowledge about Kubernetes (Replication Controller, Service, Persistent Volume, Persistent Volume Claim, Config Map). 
 
 ### Configuration
 We provide a python script `make/kubernetes/prepare` to generate Kubernetes ConfigMap files. 
- The script is written in python3, so you need a python in your environment which version is greater than 3.
- Also the script need `openssl` to generate private key and certification, make sure you have a version of `openssl` in your environment. 
+The script is written in python, so you need a version of python in your deployment environment.
+Also the script need `openssl` to generate private key and certification, make sure you have a workable `openssl`. 
 
-There are some args of the script:
-- -f: Default Value is `../harbor.cfg` . You can specify other config file of Harbor.
-- -k: Path to https private key. You can set it in `harbor.cfg`. This arg can overwrite `ssl_cert_key` in `harbor.cfg` .
-- -c: Path to https certification. You can set it in `harbor.cfg`. This arg can overwrite `ssl_cert` in `harbor.cfg` .
-- -s: Path to secret key. Must be 16 characters. If you don't set it, It will be generated automatically. 
+There are some args of the python script:
+- -f: Default Value is `../harbor.cfg`. You can specify other config file of Harbor.
+- -k: Path to https private key. This arg can overwrite the value of `ssl_cert_key` in `harbor.cfg`.
+- -c: Path to https certification. This arg can overwrite the value of `ssl_cert` in `harbor.cfg`.
+- -s: Path to secret key. Must be 16 characters. If you don't set it, the script will generate it automatically. 
 
 #### Basic Configuration
 These Basic Configuration must be set. Otherwise you can't deploy Harbor on Kubernetes.
-- `make/harbor.cfg` : Basic config of Harbor. Please refer to `harbor.cfg` .
-- `make/kubernetes/**/*.rc.yaml` : Specify configs of containers.  
-  You need to specify the path to your images in all `*.rc.yaml` . example:
+- `make/harbor.cfg`: Basic config of Harbor. Please refer to `harbor.cfg`.
+- `make/kubernetes/**/*.rc.yaml`: Specify configs of containers.  
+  You need to specify the path to your images in all `*.rc.yaml`. example:
 
   ```
   containers:
@@ -30,7 +30,7 @@ These Basic Configuration must be set. Otherwise you can't deploy Harbor on Kube
         image: harbor/nginx
   ```
 
-- `make/kubernetes/pv/*.pvc.yaml` : Persistent Volume Claim.  
+- `make/kubernetes/pv/*.pvc.yaml`: Persistent Volume Claim.  
   You can set capacity of storage in these files. example:
 
   ```
@@ -40,7 +40,7 @@ These Basic Configuration must be set. Otherwise you can't deploy Harbor on Kube
       storage: 100Gi
   ```
 
-- `make/kubernetes/pv/*.pv.yaml` : Persistent Volume. Be bound with `*.pvc.yaml` .  
+- `make/kubernetes/pv/*.pv.yaml`: Persistent Volume. Be bound with `*.pvc.yaml`.  
   PVs and PVCs are one to one correspondence. If you changed capacity of PVC, you need to set capacity of PV together.
   example:
 
@@ -77,15 +77,14 @@ These files will be generated:
 If Basic Configuration was not covering your requirements, you can read this section for more details.
 
 `./prepare` has a specify format of placeholder:
-- `{{key}}` : It means we should replace the placeholder with the value in `config.cfg` which name is `key` .
-- `{{num key}}` : It's used for multiple lines text. It will add `num` spaces to the leading of every line in text.
+- `{{key}}`: It means we should replace the placeholder with the value in `config.cfg` which name is `key`.
+- `{{num key}}`: It's used for multiple lines text. It will add `num` spaces to the leading of every line in text.
 
-You can find all configs of Harbor in `make/kubernetes/templates/`.There are specifications of these files:
-- `jobservice.cm.yaml` : ENV and web config of jobservice
-- `mysql.cm.yaml` : Root passowrd of MySQL
-- `nginx.cm.yaml` : Https certification and nginx config  
-  If you are fimiliar with nginx, you can modify it. 
-- `registry.cm.yaml` : Token service certification and registry config
+You can find all configs of Harbor in `make/kubernetes/templates/`. There are specifications of these files:
+- `jobservice.cm.yaml`: ENV and web config of jobservice
+- `mysql.cm.yaml`: Root passowrd of MySQL
+- `nginx.cm.yaml`: Https certification and nginx config. If you are fimiliar with nginx, you can modify it. 
+- `registry.cm.yaml`: Token service certification and registry config
   Registry use filesystem to store data of images. You can find it like:
 
   ```
@@ -95,9 +94,9 @@ You can find all configs of Harbor in `make/kubernetes/templates/`.There are spe
   ``` 
 
   If you want use another storage backend, please see [Docker Doc](https://docs.docker.com/datacenter/dtr/2.1/guides/configure/configure-storage/)
-- `ui.cm.yaml` : Token service private key, ENV and web config of ui 
+- `ui.cm.yaml`: Token service private key, ENV and web config of ui 
 
-`ui` and `jobservice` are powered by beego. If you are fimiliar with beego, you can modify configs in `jobservice.cm.yaml` and `ui.cm.yaml` .
+`ui` and `jobservice` are powered by beego. If you are fimiliar with beego, you can modify configs in `jobservice.cm.yaml` and `ui.cm.yaml`.
 
 
 
